@@ -1,0 +1,88 @@
+@model FacilitySearchViewModel
+@{
+    ViewData["Title"] = "Find Facilities";
+}
+<div class="container py-5">
+    <div class="mb-4">
+        <span class="kicker">MEMBER SEARCH & LIVE AVAILABILITY</span>
+        <h1 class="display-6 fw-bold mb-2">Find & Reserve Sports Venues</h1>
+        <p class="text-muted lead fs-6">Filter by sport category, location, and specific date & time slot for real-time conflict-free availability.</p>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4">
+            <form method="get" asp-controller="Facility" asp-action="Search" class="row g-3 align-items-end">
+                <div class="col-12 col-md-6 col-lg-3">
+                    <label class="form-label small fw-semibold text-muted">Sport Category</label>
+                    <select class="form-select" asp-for="FacilityTypeId">
+                        <option value="">All Categories</option>
+                        @foreach (var t in Model.Types)
+                        {
+                            <option value="@t.FacilityTypeID">@t.TypeName</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                    <label class="form-label small fw-semibold text-muted">Location / Area</label>
+                    <input class="form-control" asp-for="Location" placeholder="e.g. North, Central..." />
+                </div>
+                <div class="col-12 col-md-4 col-lg-2">
+                    <label class="form-label small fw-semibold text-muted">Booking Date</label>
+                    <input class="form-control" type="date" asp-for="Date" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <label class="form-label small fw-semibold text-muted">From (Start)</label>
+                    <input class="form-control" type="time" asp-for="StartTime" />
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <label class="form-label small fw-semibold text-muted">Until (End)</label>
+                    <input class="form-control" type="time" asp-for="EndTime" />
+                </div>
+                <div class="col-12 d-flex gap-2 flex-wrap pt-2">
+                    <button class="btn btn-brand rounded-pill px-4 fw-bold">
+                        <i class="bi bi-search me-1"></i> Search Slots
+                    </button>
+                    <a class="btn btn-outline-secondary rounded-pill px-4" asp-controller="Facility" asp-action="Search">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 rounded-4 shadow-sm mb-4"></div>
+
+    @{
+        string when = Model.Date.HasValue && Model.StartTime.HasValue && Model.EndTime.HasValue
+            ? $"for {Model.Date.Value:ddd, dd MMM yyyy} ({Model.StartTime.Value.ToString(@"hh\:mm")} – {Model.EndTime.Value.ToString(@"hh\:mm")})"
+            : "";
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0">
+            <span class="badge bg-emerald text-white rounded-pill px-3 py-2 me-2">@Model.Results.Count</span> 
+            Venues Available @when
+        </h5>
+    </div>
+
+    @if (Model.Results.Count == 0)
+    {
+        <div class="card border-0 shadow-sm rounded-4 p-5 text-center">
+            <div class="display-4 text-muted mb-3"><i class="bi bi-calendar-x"></i></div>
+            <h4>No venues available for the selected criteria</h4>
+            <p class="text-muted">Try adjusting your time slot or expanding your location search.</p>
+            <a class="btn btn-brand rounded-pill px-4 mx-auto" asp-controller="Facility" asp-action="Search">
+                Reset Search Filters
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var f in Model.Results)
+            {
+                <partial name="_FacilityCard" model="f" />
+            }
+        </div>
+    }
+</div>

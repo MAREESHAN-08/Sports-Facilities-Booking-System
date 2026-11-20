@@ -1,0 +1,76 @@
+@{
+    ViewData["Title"] = "Facility Reviews";
+    var facility = (Facility)ViewBag.Facility;
+    var reviews = (List<Review>)ViewBag.Reviews;
+    double avg = facility.AvgRating ?? 0;
+    string imageUrl = FacilityImageHelper.GetFacilityImage(facility.TypeName, facility.FacilityName, facility.FacilityID);
+    string sportIcon = FacilityImageHelper.GetSportIcon(facility.TypeName);
+}
+<div class="container py-5">
+    <div class="mb-3">
+        <a class="text-decoration-none text-muted small fw-semibold" asp-controller="Facility" asp-action="Details" asp-route-id="@facility.FacilityID">
+            <i class="bi bi-arrow-left me-1"></i> Back to @facility.FacilityName
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+        <div class="row align-items-center g-3">
+            <div class="col-md-8">
+                <span class="badge bg-emerald-light text-brand rounded-pill px-3 py-1 fw-bold mb-2">
+                    <i class="bi @sportIcon me-1"></i>@facility.TypeName
+                </span>
+                <h2 class="fw-bold mb-1">@facility.FacilityName — Reviews</h2>
+                <p class="text-muted small mb-0"><i class="bi bi-geo-alt-fill text-danger me-1"></i>@facility.Location</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="d-inline-flex align-items-center gap-3 p-3 rounded-4 bg-emerald-light">
+                    <span class="display-6 fw-bold text-brand mb-0">@avg.ToString("0.0")</span>
+                    <div class="text-start">
+                        <div>
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <i class="bi bi-star@(i <= Math.Round(avg) ? "-fill" : "") text-warning"></i>
+                            }
+                        </div>
+                        <div class="small text-muted fw-semibold">@reviews.Count player review(s)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (reviews.Count == 0)
+    {
+        <div class="card border-0 shadow-sm rounded-4 p-5 text-center">
+            <div class="display-4 text-muted mb-3"><i class="bi bi-chat-dots"></i></div>
+            <h4>No reviews submitted yet for this venue</h4>
+            <p class="text-muted">Book a slot and share your thoughts to help other community members!</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var rv in reviews)
+            {
+                <div class="col-12 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 p-4 feature-card">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold"><i class="bi bi-person-circle text-brand me-1"></i>@rv.MemberName</span>
+                            <span class="small text-muted">@rv.ReviewDate.ToString("dd MMM yyyy")</span>
+                        </div>
+                        <div class="mb-2">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <i class="bi bi-star@(i <= rv.Rating ? "-fill" : "") text-warning small"></i>
+                            }
+                        </div>
+                        @if (!string.IsNullOrEmpty(rv.Comments))
+                        {
+                            <p class="text-muted mb-0 small">@rv.Comments</p>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

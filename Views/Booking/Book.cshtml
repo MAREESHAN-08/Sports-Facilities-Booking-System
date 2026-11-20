@@ -1,0 +1,117 @@
+@model BookingCreateViewModel
+@{
+    ViewData["Title"] = "Book " + Model.Facility.FacilityName;
+    string imageUrl = FacilityImageHelper.GetFacilityImage(Model.Facility.TypeName, Model.Facility.FacilityName, Model.Facility.FacilityID);
+    string sportIcon = FacilityImageHelper.GetSportIcon(Model.Facility.TypeName);
+}
+<div class="container py-5">
+    <div class="mb-3">
+        <a class="text-decoration-none text-muted small fw-semibold" asp-controller="Facility" asp-action="Details" asp-route-id="@Model.Facility.FacilityID">
+            <i class="bi bi-arrow-left me-1"></i> Back to Facility Details
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left Summary Card -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                <div class="facility-img-wrap position-relative">
+                    <img src="@imageUrl" alt="@Model.Facility.FacilityName" class="facility-card-img" />
+                    <span class="facility-card-badge"><i class="bi @sportIcon me-1 text-warning"></i>@Model.Facility.TypeName</span>
+                </div>
+                <div class="card-body p-4">
+                    <h4 class="fw-bold mb-1">@Model.Facility.FacilityName</h4>
+                    <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i>@Model.Facility.Location</p>
+                    <p class="text-muted small mb-3">@Model.Facility.Description</p>
+                    
+                    <div class="p-3 bg-light rounded-3 d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-muted small fw-semibold">Standard Rate:</span>
+                        <span class="price-tag">£@Model.Facility.HourlyRate.ToString("0.00")<span class="text-muted small fs-6 fw-normal">/hr</span></span>
+                    </div>
+
+                    <div class="card border-0 bg-emerald-light rounded-4 text-center p-3">
+                        <div class="small text-muted fw-semibold mb-1">Estimated Booking Total</div>
+                        <div class="display-6 fw-bold text-brand" id="pricePreview">--</div>
+                        <div class="small text-muted" id="hoursPreview">Select booking time</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Reservation Form -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 p-md-5">
+                    <span class="kicker">CONFIRM RESERVATION</span>
+                    <h3 class="fw-bold mb-3">Choose Date & Slot</h3>
+                    
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 rounded-4 shadow-sm mb-4"></div>
+
+                    <form asp-action="Book" method="post">
+                        <input type="hidden" asp-for="FacilityID" />
+                        <input type="hidden" id="rate" value="@Model.Facility.HourlyRate" />
+
+                        <div class="row g-3">
+                            <div class="col-12 col-md-12">
+                                <label asp-for="BookingDate" class="form-label small fw-semibold text-muted">Booking Date *</label>
+                                <input type="date" class="form-control form-control-lg" asp-for="BookingDate"
+                                       min='@DateTime.Today.ToString("yyyy-MM-dd")' required />
+                                <span asp-validation-for="BookingDate" class="text-danger small"></span>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label asp-for="StartTime" class="form-label small fw-semibold text-muted">Start Time *</label>
+                                <input type="time" class="form-control form-control-lg" asp-for="StartTime" required />
+                                <span asp-validation-for="StartTime" class="text-danger small"></span>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label asp-for="EndTime" class="form-label small fw-semibold text-muted">End Time *</label>
+                                <input type="time" class="form-control form-control-lg" asp-for="EndTime" required />
+                                <span asp-validation-for="EndTime" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info border-0 rounded-4 mt-4 p-3 small">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            An instant conflict check will ensure this arena is available for your entire chosen time slot. Your PDF pass with QR code will be ready right after booking.
+                        </div>
+
+                        <div class="mt-4 d-flex gap-3 flex-wrap">
+                            <button class="btn btn-brand btn-lg rounded-pill px-5 fw-bold shadow-sm">
+                                <i class="bi bi-calendar-check me-2"></i>Confirm & Book
+                            </button>
+                            <a class="btn btn-outline-secondary btn-lg rounded-pill px-4" asp-controller="Facility" asp-action="Search">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function updatePrice() {
+            var rate = parseFloat(document.getElementById('rate').value);
+            var s = document.getElementById('StartTime').value;
+            var e = document.getElementById('EndTime').value;
+            var priceEl = document.getElementById('pricePreview');
+            var hoursEl = document.getElementById('hoursPreview');
+            if (!s || !e) { priceEl.innerText = '--'; hoursEl.innerText = 'Select booking time'; return; }
+            var sh = parseInt(s.split(':')[0]), sm = parseInt(s.split(':')[1]);
+            var eh = parseInt(e.split(':')[0]), em = parseInt(e.split(':')[1]);
+            var hours = (eh * 60 + em - (sh * 60 + sm)) / 60;
+            if (hours > 0) {
+                priceEl.innerText = '£' + (hours * rate).toFixed(2);
+                hoursEl.innerText = hours.toFixed(1) + ' hour(s) session';
+            } else {
+                priceEl.innerText = '--';
+                hoursEl.innerText = 'End time must be after start time';
+            }
+        }
+        document.getElementById('StartTime').addEventListener('change', updatePrice);
+        document.getElementById('EndTime').addEventListener('change', updatePrice);
+    </script>
+}

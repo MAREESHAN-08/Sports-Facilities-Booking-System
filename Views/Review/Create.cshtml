@@ -1,0 +1,138 @@
+@model ReviewCreateViewModel
+@{
+    ViewData["Title"] = "Write a Review";
+}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="p-4 bg-emerald text-white text-center">
+                    <div class="brand-icon mx-auto mb-2"><i class="bi bi-star-fill fs-5"></i></div>
+                    <h3 class="fw-bold mb-1 text-white">Share Your Experience</h3>
+                    <p class="small text-white-50 mb-0">Help other players discover the best community sports venues</p>
+                </div>
+                <div class="card-body p-4 p-md-5 bg-white">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 rounded-4 shadow-sm mb-4"></div>
+                    <form asp-controller="Review" asp-action="Create" method="post" id="reviewForm">
+                        <div class="mb-4">
+                            <label class="form-label small fw-semibold text-muted">Select Facility You Have Booked *</label>
+                            <select class="form-select form-select-lg" asp-for="FacilityID" required>
+                                <option value="">-- Choose a facility --</option>
+                                @foreach (var f in Model.BookedFacilities)
+                                {
+                                    <option value="@f.FacilityID">@f.FacilityName</option>
+                                }
+                            </select>
+                            <span asp-validation-for="FacilityID" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Modern Reliable Star Rating Component -->
+                        <div class="mb-4 text-center">
+                            <label class="form-label small fw-semibold text-muted d-block mb-2">Your Rating *</label>
+                            <input type="hidden" asp-for="Rating" id="ratingValue" value="@Model.Rating" required />
+                            
+                            <div class="d-inline-flex align-items-center justify-content-center gap-2 p-2 rounded-4 bg-light border" id="starContainer">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <button type="button" 
+                                            class="btn btn-link p-1 text-decoration-none star-btn" 
+                                            data-rating="@i" 
+                                            id="starBtn-@i"
+                                            title="@i Star@(i > 1 ? "s" : "")"
+                                            style="font-size: 2rem; line-height: 1; color: #cbd5e1; transition: transform 0.15s ease, color 0.15s ease;">
+                                        <i class="bi bi-star" id="starIcon-@i"></i>
+                                    </button>
+                                }
+                            </div>
+                            <div class="small fw-semibold text-brand mt-2" id="ratingFeedbackText">Click a star to rate</div>
+                            <span asp-validation-for="Rating" class="text-danger small d-block mt-1"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Comments" class="form-label small fw-semibold text-muted">Your Comments & Feedback</label>
+                            <textarea class="form-control" rows="4" asp-for="Comments"
+                                      placeholder="How was the turf/court condition, lighting, changing rooms, or staff?"></textarea>
+                            <span asp-validation-for="Comments" class="text-danger small"></span>
+                        </div>
+                        <button class="btn btn-brand btn-lg w-100 rounded-pill fw-bold shadow-sm">
+                            <i class="bi bi-send-fill me-2"></i>Publish Review
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const ratingInput = document.getElementById('ratingValue');
+            const feedbackText = document.getElementById('ratingFeedbackText');
+            const starBtns = document.querySelectorAll('.star-btn');
+            
+            const ratingLabels = {
+                1: '⭐ 1 Star - Poor',
+                2: '⭐⭐ 2 Stars - Fair',
+                3: '⭐⭐⭐ 3 Stars - Good',
+                4: '⭐⭐⭐⭐ 4 Stars - Very Good',
+                5: '⭐⭐⭐⭐⭐ 5 Stars - Outstanding!'
+            };
+
+            let currentRating = parseInt(ratingInput.value) || 0;
+
+            function renderStars(ratingToDisplay) {
+                for (let i = 1; i <= 5; i++) {
+                    const icon = document.getElementById('starIcon-' + i);
+                    const btn = document.getElementById('starBtn-' + i);
+                    if (i <= ratingToDisplay) {
+                        icon.className = 'bi bi-star-fill text-warning';
+                        btn.style.color = '#f59e0b';
+                        btn.style.transform = (i === ratingToDisplay) ? 'scale(1.18)' : 'scale(1.05)';
+                    } else {
+                        icon.className = 'bi bi-star';
+                        btn.style.color = '#cbd5e1';
+                        btn.style.transform = 'scale(1)';
+                    }
+                }
+            }
+
+            function setRating(val) {
+                currentRating = val;
+                ratingInput.value = val;
+                feedbackText.innerText = ratingLabels[val] || 'Selected ' + val + ' Stars';
+                renderStars(val);
+            }
+
+            starBtns.forEach(btn => {
+                const rating = parseInt(btn.getAttribute('data-rating'));
+                
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    setRating(rating);
+                });
+
+                btn.addEventListener('mouseenter', function () {
+                    renderStars(rating);
+                    feedbackText.innerText = ratingLabels[rating] || '';
+                });
+            });
+
+            document.getElementById('starContainer').addEventListener('mouseleave', function () {
+                if (currentRating > 0) {
+                    renderStars(currentRating);
+                    feedbackText.innerText = ratingLabels[currentRating];
+                } else {
+                    renderStars(0);
+                    feedbackText.innerText = 'Click a star to rate';
+                }
+            });
+
+            // Initialize if pre-filled
+            if (currentRating > 0) {
+                setRating(currentRating);
+            }
+        });
+    </script>
+}

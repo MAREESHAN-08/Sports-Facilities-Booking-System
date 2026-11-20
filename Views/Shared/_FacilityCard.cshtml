@@ -1,0 +1,68 @@
+@model SportsBookingApp.Models.Facility
+@{
+    var isMember = Context.Session.GetInt32("MemberID") != null;
+    string imageUrl = FacilityImageHelper.GetFacilityImage(Model.TypeName, Model.FacilityName, Model.FacilityID);
+    string sportIcon = FacilityImageHelper.GetSportIcon(Model.TypeName);
+    var amenities = FacilityImageHelper.GetAmenities(Model.TypeName);
+}
+<div class="col-12 col-md-6 col-lg-4">
+    <div class="card facility-card h-100 rounded-4 overflow-hidden shadow-sm">
+        <div class="facility-img-wrap">
+            <img src="@imageUrl" 
+                 alt="@Model.FacilityName" 
+                 class="facility-card-img" 
+                 loading="lazy" 
+                 onerror="this.src='https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=800&q=80'" />
+            <span class="facility-card-badge">
+                <i class="bi @sportIcon me-1 text-warning"></i>@Model.TypeName
+            </span>
+            <span class="facility-rating-badge">
+                <i class="bi bi-star-fill text-warning me-1"></i>
+                @(Model.AvgRating.HasValue ? Model.AvgRating.Value.ToString("0.0") : "New")
+                <span class="text-muted small">(@Model.ReviewCount)</span>
+            </span>
+        </div>
+        <div class="card-body p-4 d-flex flex-column">
+            <h5 class="fw-bold mb-1 text-truncate" title="@Model.FacilityName">@Model.FacilityName</h5>
+            <p class="text-muted small mb-2">
+                <i class="bi bi-geo-alt-fill text-danger me-1"></i>@Model.Location &nbsp;•&nbsp;
+                <i class="bi bi-people-fill text-primary me-1"></i>Cap @Model.Capacity
+            </p>
+
+            <div class="d-flex flex-wrap gap-1 mb-3">
+                @foreach (var amenity in amenities.Take(2))
+                {
+                    <span class="amenity-chip"><i class="bi bi-check2 text-brand me-1"></i>@amenity</span>
+                }
+            </div>
+
+            <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                @if (isMember)
+                {
+                    <div>
+                        <div class="text-muted small line-height-1">Price</div>
+                        <span class="price-tag">£@Model.HourlyRate.ToString("0.00")<span class="text-muted fs-6 fw-normal">/hr</span></span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a class="btn btn-sm btn-outline-brand rounded-pill px-3" asp-controller="Facility" asp-action="Details" asp-route-id="@Model.FacilityID">
+                            Details
+                        </a>
+                        <a class="btn btn-sm btn-brand rounded-pill px-3 fw-bold" asp-controller="Booking" asp-action="Book" asp-route-facilityId="@Model.FacilityID">
+                            Book <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div>
+                        <div class="text-muted small"><i class="bi bi-lock-fill text-warning me-1"></i>Member Rate</div>
+                        <span class="text-muted small">Sign in to view</span>
+                    </div>
+                    <a class="btn btn-sm btn-brand rounded-pill px-3 fw-bold" asp-controller="Facility" asp-action="Details" asp-route-id="@Model.FacilityID">
+                        View Details <i class="bi bi-chevron-right"></i>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>

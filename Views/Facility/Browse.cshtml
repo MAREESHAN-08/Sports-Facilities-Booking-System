@@ -1,0 +1,96 @@
+@{
+    ViewData["Title"] = "Browse Venues — ArenaPulse";
+    var types = (List<FacilityType>)ViewBag.Types;
+    var results = (List<Facility>)ViewBag.Results;
+}
+<div class="container py-5">
+    <div class="mb-4">
+        <span class="kicker">GUEST & PUBLIC VENUE DIRECTORY</span>
+        <h1 class="display-6 fw-bold mb-2">Explore Community Sports Venues</h1>
+        <p class="text-muted lead fs-6">Browse facilities by sport type or location. <strong>Rates and live booking reservations are available to registered members.</strong></p>
+    </div>
+
+    @if (Context.Session.GetInt32("MemberID") == null)
+    {
+        <div class="alert alert-warning border-0 shadow-sm rounded-4 d-flex align-items-center flex-wrap gap-3 p-4 mb-4">
+            <div class="icon-circle bg-warning text-dark flex-shrink-0">
+                <i class="bi bi-lightning-charge-fill fs-5"></i>
+            </div>
+            <div class="flex-grow-1">
+                <h6 class="fw-bold mb-1">Want to check exact hourly pricing and reserve slots?</h6>
+                <p class="small mb-0 text-dark opacity-75">
+                    Sign in with your account or continue instantly using our 1-click guest player access.
+                </p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <form asp-controller="Account" asp-action="GuestLogin" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-sm btn-dark rounded-pill px-3 fw-bold">
+                        <i class="bi bi-play-circle-fill me-1 text-warning"></i> 1-Click Guest Login
+                    </button>
+                </form>
+                <a asp-controller="Account" asp-action="Register" class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-semibold">
+                    Join Free
+                </a>
+            </div>
+        </div>
+    }
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4">
+            <form method="get" asp-controller="Facility" asp-action="Browse" class="row g-3 align-items-end">
+                <div class="col-12 col-md-5">
+                    <label class="form-label small fw-semibold text-muted">Facility Category</label>
+                    <select class="form-select" name="typeId">
+                        <option value="">All Sports Categories</option>
+                        @foreach (var t in types)
+                        {
+                            <option value="@t.FacilityTypeID" selected="@(ViewBag.TypeId != null && (int)ViewBag.TypeId == t.FacilityTypeID)">@t.TypeName</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-12 col-md-5">
+                    <label class="form-label small fw-semibold text-muted">Location / Area</label>
+                    <input class="form-control" name="location" value="@ViewBag.Location" placeholder="e.g. North, Central, West Wing..." />
+                </div>
+                <div class="col-12 col-md-2">
+                    <button class="btn btn-brand w-100 rounded-pill fw-bold">
+                        <i class="bi bi-search me-1"></i> Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0">
+            <span class="badge bg-emerald text-white rounded-pill px-3 py-2 me-2">@results.Count</span> Venues Available
+        </h5>
+        @if (ViewBag.TypeId != null || !string.IsNullOrEmpty(ViewBag.Location as string))
+        {
+            <a asp-controller="Facility" asp-action="Browse" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                <i class="bi bi-x-circle me-1"></i> Clear Filters
+            </a>
+        }
+    </div>
+
+    @if (results.Count == 0)
+    {
+        <div class="card border-0 shadow-sm rounded-4 p-5 text-center">
+            <div class="display-4 text-muted mb-3"><i class="bi bi-search"></i></div>
+            <h4>No sports venues matched your filter</h4>
+            <p class="text-muted">Try selecting a different sport or clearing the location filter.</p>
+            <a class="btn btn-brand rounded-pill px-4 mx-auto" asp-controller="Facility" asp-action="Browse">
+                Show All Venues
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var f in results)
+            {
+                <partial name="_FacilityCard" model="f" />
+            }
+        </div>
+    }
+</div>

@@ -1,0 +1,90 @@
+@model Inquiry
+@{
+    ViewData["Title"] = "Contact & Inquiries";
+}
+<div class="container py-5">
+    <div class="row g-4 align-items-stretch">
+        <div class="col-lg-5">
+            <span class="kicker">GUESTS & RESIDENTS</span>
+            <h1 class="display-6 fw-bold mb-2">Council Sports Support</h1>
+            <p class="text-muted lead fs-6 mb-4">Have questions about school bookings, seasonal tournaments, or membership? Reach out directly to our municipal team.</p>
+            
+            <div class="card border-0 shadow-lg rounded-4 text-white p-4 h-auto" style="background:var(--brand-gradient)">
+                <h5 class="fw-bold mb-3 d-flex align-items-center">
+                    <span class="brand-icon me-2" style="width:32px;height:32px;"><i class="bi bi-building"></i></span>
+                    Sports Council Headquarters
+                </h5>
+                <div class="d-flex flex-column gap-3 small">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-geo-alt-fill text-warning fs-5"></i>
+                        <div>
+                            <strong>Physical Office:</strong><br />
+                            1 Community Way, Civic Center, London
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-telephone-fill text-warning fs-5"></i>
+                        <div>
+                            <strong>Phone Lines:</strong><br />
+                            020 7946 0000 (Mon–Fri, 9am–5pm)
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-envelope-fill text-warning fs-5"></i>
+                        <div>
+                            <strong>Email Inquiries:</strong><br />
+                            bookings@sportscouncil.gov
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-clock-fill text-warning fs-5"></i>
+                        <div>
+                            <strong>Venue Operating Hours:</strong><br />
+                            Monday – Sunday: 7:00 AM – 10:00 PM
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 p-md-5">
+                    <h4 class="fw-bold mb-2">Send an Inquiry</h4>
+                    <p class="text-muted small mb-4">Fill out the form below and a council sports officer will get back to your email within 24 hours.</p>
+                    
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 rounded-4 shadow-sm mb-4"></div>
+                    <form asp-controller="Home" asp-action="Contact" method="post">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small fw-semibold text-muted">Your Name *</label>
+                                <input class="form-control" asp-for="GuestName" placeholder="e.g. Sarah Connor" required />
+                                <span asp-validation-for="GuestName" class="text-danger small"></span>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small fw-semibold text-muted">Your Email *</label>
+                                <input class="form-control" type="email" asp-for="GuestEmail" placeholder="sarah@email.com" required />
+                                <span asp-validation-for="GuestEmail" class="text-danger small"></span>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold text-muted">Subject / Department</label>
+                                <input class="form-control" asp-for="Subject" placeholder="e.g. Bulk tournament booking query" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold text-muted">Message / Question *</label>
+                                <textarea class="form-control" rows="5" asp-for="Message" placeholder="Tell us how we can help..." required></textarea>
+                                <span asp-validation-for="Message" class="text-danger small"></span>
+                            </div>
+                        </div>
+                        <button class="btn btn-brand btn-lg rounded-pill mt-4 px-5 fw-bold shadow-sm">
+                            <i class="bi bi-send me-2"></i>Send Inquiry
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
